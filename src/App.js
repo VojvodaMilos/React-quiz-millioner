@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
+import Start from "./component/Start";
+import Timer from "./component/Timer";
 import Trivia from "./component/Trivia";
 
 function App() {
   const [questionNumber, setQuestionNumber] = useState(1);
   const [stop, setStop] = useState(false);
+  const [earned, setEarned] = useState("$ 0");
+  const [start, setStart] = useState();
 
   const data = [
     {
@@ -93,22 +97,42 @@ function App() {
     { id: 15, amount: "$ 1000000" },
   ].reverse();
 
+  useEffect(() => {
+    if (questionNumber > 1) {
+      const money = moneyPyramid.find((m) => m.id == questionNumber - 1);
+      setEarned(money.amount);
+    }
+  }, [questionNumber]);
+
+  // useEffect(() => {
+  //   questionNumber > 1 &&
+  //     setEarned(moneyPyramid.find((m) => m.id === questionNumber - 1).amount);
+  // }, [moneyPyramid, questionNumber]);
+
   return (
     <div className="app">
-      {stop ? (
-        <h1 className="endText">You earned:{}</h1>
-      ) : (
+      {start ? (
         <>
           <div className="main">
-            <div className="top"></div>
-            <div className="bottom">
-              <Trivia
-                data={data}
-                questionNumber={questionNumber}
-                setQuestionNumber={setQuestionNumber}
-                setStop={setStop}
-              />
-            </div>
+            {stop ? (
+              <h1 className="endText">You earned: {earned}</h1>
+            ) : (
+              <>
+                <div className="top">
+                  <div className="timer">
+                    <Timer questionNumber={questionNumber} setStop={setStop} />
+                  </div>
+                </div>
+                <div className="bottom">
+                  <Trivia
+                    data={data}
+                    questionNumber={questionNumber}
+                    setQuestionNumber={setQuestionNumber}
+                    setStop={setStop}
+                  />
+                </div>
+              </>
+            )}
           </div>
           <div className="pyramid">
             <ul className="moneyList">
@@ -122,7 +146,7 @@ function App() {
                         : "moneyListItem"
                     }
                   >
-                    <span className="moneyListItemNumber">{m.id}</span>{" "}
+                    <span className="moneyListItemNumber">{m.id}</span>
                     <span className="moneyListItemAmount">{m.amount}</span>
                   </li>
                 );
@@ -130,6 +154,8 @@ function App() {
             </ul>
           </div>
         </>
+      ) : (
+        <Start setStart={setStart}/>
       )}
     </div>
   );
